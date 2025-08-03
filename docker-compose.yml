@@ -1,0 +1,12 @@
+services:
+  foxglove:
+    container_name: rosws
+    build: .
+    ports:
+      - "8765:8765"
+    environment:
+      - ROS_DOMAIN_ID=0
+    volumes:
+      - ./ws:/home/ros/ros2_ws
+    stdin_open: true
+    tty: true

@@ -344,3 +344,4 @@ doc/
 .DS_Store
 ws/log/*
 ws/install/*
+ws/webots/*

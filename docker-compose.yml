@@ -3,9 +3,14 @@ services:
     container_name: rosws
     build: .
     ports:
-      - "8765:8765"
+      - "9090:9090" # rosbridge
+      - "9876:9876" # for troubleshooting
     environment:
       - ROS_DOMAIN_ID=0
+      - TERM=xterm-256color
+      - TURTLEBOT3_MODEL=burger
+      - WEBOTS_SHARED_FOLDER=/Users/hassanumari/dev/ros_workshop/ws/webots:/home/ros/ros2_ws/webots
+      - WEBOTS_HOST=0.0.0.0
     volumes:
       - ./ws:/home/ros/ros2_ws
     stdin_open: true

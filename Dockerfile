@@ -7,9 +7,10 @@ ENV TZ=Etc/UTC
 # Update & install GUI and desktop packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-jazzy-desktop-full \
-    ros-jazzy-foxglove-bridge \
+    ros-jazzy-rosbridge-suite \
+    ros-jazzy-webots-ros2\
     python3-colcon-common-extensions \
-    x11-apps \
+    netcat-openbsd lsof htop\
     && rm -rf /var/lib/apt/lists/*
 
 # Optional: Add user for GUI compatibility
@@ -25,4 +26,4 @@ SHELL ["/bin/bash", "-c"]
 RUN echo "source /home/ros/ros2_ws/install/setup.bash" >> ~/.bashrc
 
 # Launch Foxglove Bridge node by default
-CMD ["bash", "-c", "source /home/ros/ros2_ws/install/setup.bash && ros2 launch foxglove_bridge foxglove_bridge_launch.xml"]
+CMD ["bash", "-c", "source /home/ros/ros2_ws/install/setup.bash && ros2 launch rosbridge_server rosbridge_websocket_launch.xml"]

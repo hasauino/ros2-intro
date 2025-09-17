@@ -21,6 +21,9 @@ setup(
     license="MIT",
     tests_require=["pytest"],
     entry_points={
-        "console_scripts": [],
+        "console_scripts": [
+            "talker = tabit.01_talker:main",
+            "listener = tabit.01_listener:main",
+        ],
     },
 )

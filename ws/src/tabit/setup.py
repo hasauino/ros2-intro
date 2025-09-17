@@ -24,6 +24,7 @@ setup(
         "console_scripts": [
             "talker = tabit.01_talker:main",
             "listener = tabit.01_listener:main",
+            "robot_commander = tabit.02_robot_commander:main",
         ],
     },
 )

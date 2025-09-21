@@ -130,9 +130,9 @@ def generate_launch_description():
         turtlebot_navigation = IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
                 os.path.join(
-                    get_package_share_directory("turtlebot3_navigation2"),
+                    package_dir,
                     "launch",
-                    "navigation2.launch.py",
+                    "turtlebot_navigation.launch.py",
                 )
             ),
             launch_arguments=[

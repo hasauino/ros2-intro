@@ -5,12 +5,13 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
 
 # Update & install GUI and desktop packages
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt update && apt install -y --no-install-recommends \
     ros-jazzy-desktop-full \
     ros-jazzy-rosbridge-suite \
-    ros-jazzy-webots-ros2\
+    ros-jazzy-webots-ros2 \
+    ros-jazzy-turtlebot3 \
     python3-colcon-common-extensions \
-    netcat-openbsd lsof htop\
+    netcat-openbsd lsof htop \
     && rm -rf /var/lib/apt/lists/*
 
 # Optional: Add user for GUI compatibility
@@ -19,7 +20,6 @@ RUN useradd -m $USERNAME && echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" >> /etc/sudo
 
 USER $USERNAME
 WORKDIR /home/$USERNAME
-
 
 # Set default ROS environment
 SHELL ["/bin/bash", "-c"]

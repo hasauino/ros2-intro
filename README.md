@@ -6,19 +6,13 @@
 
 - Clone the repo
 
-- Build docker image
-
-  ```bash
-  docker-compose build
-  ```
-
 - Add `dox` bash alias so we can quickly enter ros2 container
 
   ```bash
   echo 'alias dox="docker exec -it rosws /bin/bash"' >> ~/.bashrc
   ```
 
-- Install [Webots](https://cyberbotics.com/#download) simulator on the host (not inside docker). 
+- Install [Webots](https://cyberbotics.com/#download) (latest version - R2025a) simulator on the host (not inside docker). 
 
   
 
@@ -27,7 +21,7 @@
 - Start docker container
 
   ```bash
-  docker-compose up --detach
+  docker-compose up
   ```
 
 - Use ROS commands within the container
@@ -41,21 +35,17 @@
 
 ## 🤖 Simulation
 
-- Launch s ROS simulation
+- Launch a ROS simulation
 
-  - Turtlebot
+    - Turtlebot
+      ```bash
+      ros2 launch tabit turtlebot.py
+      ```
 
-
-  ```bash
-  ros2 launch tabit turtlebot.py
-  ```
-
-  - Tesla
-
-
-  ```bash
-  ros2 launch tabit tesla.py
-  ```
+    - Tesla
+      ```bash
+      ros2 launch tabit tesla.py
+      ```
 
 
 - Open Simulation world in Webots (from host, :file_folder: `ws/webots/<sim file>`)
@@ -77,6 +67,14 @@ ros2 topic pub /cmd_vel geometry_msgs/msg/TwistStamped "{
     angular: {x: 0.0, y: 0.0, z: 0.3}
   }
 }"
+```
+
+
+
+- Keyboard teleop
+
+```bash
+ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -p stamped:=true
 ```
 
 

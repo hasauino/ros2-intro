@@ -1,15 +1,14 @@
 services:
-  foxglove:
-    container_name: rosws
+  rosws:
     build: .
+    container_name: rosws
     ports:
       - "9090:9090" # rosbridge
-      - "9876:9876" # for troubleshooting
     environment:
       - ROS_DOMAIN_ID=0
       - TERM=xterm-256color
       - TURTLEBOT3_MODEL=burger
-      - WEBOTS_SHARED_FOLDER=/Users/hassanumari/dev/ros_workshop/ws/webots:/home/ros/ros2_ws/webots
+      - WEBOTS_SHARED_FOLDER=$PWD/ws/webots:/home/ros/ros2_ws/webots
       - WEBOTS_HOST=0.0.0.0
     volumes:
       - ./ws:/home/ros/ros2_ws

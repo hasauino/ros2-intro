@@ -344,4 +344,6 @@ doc/
 .DS_Store
 ws/log/*
 ws/install/*
-ws/webots/*
+ws/webots/*.wbt
+ws/webots/*.wbproj
+TODO

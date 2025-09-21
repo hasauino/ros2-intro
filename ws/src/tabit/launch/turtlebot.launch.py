@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+# Taken from: webots_ros2_turtlebot/robot_launch.py
 # Copyright 1996-2023 Cyberbotics Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,29 +18,36 @@
 """Launch Webots TurtleBot3 Burger driver."""
 
 import os
-
-import launch
-from ament_index_python.packages import get_package_share_directory
-from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
+from launch.actions import DeclareLaunchArgument
 from launch.substitutions.path_join_substitution import PathJoinSubstitution
+from launch import LaunchDescription
 from launch_ros.actions import Node
+import launch
+from ament_index_python.packages import (
+    get_package_share_directory,
+    get_packages_with_prefixes,
+)
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.actions import IncludeLaunchDescription
+from webots_ros2_driver.webots_launcher import WebotsLauncher
+from webots_ros2_driver.webots_controller import WebotsController
 from webots_ros2_driver.wait_for_controller_connection import (
     WaitForControllerConnection,
 )
-from webots_ros2_driver.webots_controller import WebotsController
-from webots_ros2_driver.webots_launcher import WebotsLauncher
 
 
 def generate_launch_description():
-    package_dir = get_package_share_directory("webots_ros2_turtlebot")
+    package_dir = get_package_share_directory("tabit")
+    webots_ros2_turtlebot_dir = get_package_share_directory("webots_ros2_turtlebot")
     world = LaunchConfiguration("world")
     mode = LaunchConfiguration("mode")
+    use_nav = LaunchConfiguration("nav", default=False)
+    use_slam = LaunchConfiguration("slam", default=False)
     use_sim_time = LaunchConfiguration("use_sim_time", default=True)
 
     webots = WebotsLauncher(
-        world=PathJoinSubstitution([package_dir, "worlds", world]),
+        world=PathJoinSubstitution([webots_ros2_turtlebot_dir, "worlds", world]),
         mode=mode,
         ros2_supervisor=True,
     )
@@ -81,11 +89,11 @@ def generate_launch_description():
     ]
 
     robot_description_path = os.path.join(
-        package_dir, "resource", "turtlebot_webots.urdf"
+        webots_ros2_turtlebot_dir, "resource", "turtlebot_webots.urdf"
     )
-    ros2_control_params = os.path.join(package_dir, "resource", "ros2control.yml")
+    ros2_control_params = os.path.join(webots_ros2_turtlebot_dir, "resource", "ros2control.yml")
     use_twist_stamped = "ROS_DISTRO" in os.environ and (
-        os.environ["ROS_DISTRO"] in ["rolling", "jazzy", "kilted"]
+        os.environ["ROS_DISTRO"] in ["rolling", "jazzy"]
     )
     if use_twist_stamped:
         mappings = [
@@ -111,9 +119,52 @@ def generate_launch_description():
         respawn=True,
     )
 
+    # Navigation
+    navigation_nodes = []
+    os.environ["TURTLEBOT3_MODEL"] = "burger"
+    nav2_map = os.path.join(
+        package_dir, "configs", "turtlebot_map.yaml"
+    )
+    nav2_params = os.path.join(package_dir, "configs", "turtlebot_nav.yaml")
+    if "turtlebot3_navigation2" in get_packages_with_prefixes():
+        turtlebot_navigation = IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                os.path.join(
+                    get_package_share_directory("turtlebot3_navigation2"),
+                    "launch",
+                    "navigation2.launch.py",
+                )
+            ),
+            launch_arguments=[
+                ("map", nav2_map),
+                ("params_file", nav2_params),
+                ("use_sim_time", use_sim_time),
+            ],
+            condition=launch.conditions.IfCondition(use_nav),
+        )
+        navigation_nodes.append(turtlebot_navigation)
+
+    # SLAM
+    if "turtlebot3_cartographer" in get_packages_with_prefixes():
+        turtlebot_slam = IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                os.path.join(
+                    get_package_share_directory("turtlebot3_cartographer"),
+                    "launch",
+                    "cartographer.launch.py",
+                )
+            ),
+            launch_arguments=[
+                ("use_sim_time", use_sim_time),
+            ],
+            condition=launch.conditions.IfCondition(use_slam),
+        )
+        navigation_nodes.append(turtlebot_slam)
+
     # Wait for the simulation to be ready to start navigation nodes
     waiting_nodes = WaitForControllerConnection(
-        target_driver=turtlebot_driver, nodes_to_start=ros_control_spawners
+        target_driver=turtlebot_driver,
+        nodes_to_start=navigation_nodes + ros_control_spawners,
     )
 
     return LaunchDescription(

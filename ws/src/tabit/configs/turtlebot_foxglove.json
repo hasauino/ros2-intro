@@ -1,15 +1,36 @@
 {
   "configById": {
+    "TransformTree!40b91l9": {},
+    "Teleop!29bfchs": {
+      "topic": "/cmd_vel",
+      "publishRate": 10,
+      "upButton": {
+        "field": "linear-x",
+        "value": 0.3
+      },
+      "downButton": {
+        "field": "linear-x",
+        "value": -0.3
+      },
+      "leftButton": {
+        "field": "angular-z",
+        "value": 0.7
+      },
+      "rightButton": {
+        "field": "angular-z",
+        "value": -0.7
+      }
+    },
     "3D!rosn2n": {
       "cameraState": {
         "perspective": false,
-        "distance": 21.052631578947302,
+        "distance": 16.29012499999991,
         "phi": 0.06381371406621925,
-        "thetaOffset": 96.30827634831358,
+        "thetaOffset": 89.98904474279101,
         "targetOffset": [
-          0.0007745632336175439,
-          0.007006626593579027,
-          -7.642876674263569e-22
+          0.13409330644432024,
+          -0.7223308945979635,
+          0.00014919391674160886
         ],
         "target": [
           0,
@@ -97,14 +118,17 @@
         },
         "/global_costmap/costmap": {
           "visible": true,
-          "colorMode": "costmap"
+          "colorMode": "costmap",
+          "alpha": 0.3,
+          "drawBehind": true,
+          "frameLocked": true
         },
         "/local_costmap/costmap": {
-          "visible": true,
+          "visible": false,
           "colorMode": "costmap",
           "frameLocked": false,
           "drawBehind": true,
-          "alpha": 0.5
+          "alpha": 0.3
         },
         "/scan": {
           "visible": true,
@@ -112,7 +136,7 @@
           "colorMode": "flat",
           "colorMap": "turbo",
           "flatColor": "#ff0000ff",
-          "pointSize": 2.38
+          "pointSize": 3.98
         },
         "/robot_description": {
           "visible": true
@@ -121,13 +145,19 @@
           "visible": true
         },
         "/local_plan": {
-          "visible": true
+          "visible": false,
+          "lineWidth": 0.01
         },
         "/plan_smoothed": {
           "visible": true
         },
         "/received_global_plan": {
-          "visible": true
+          "visible": true,
+          "lineWidth": 0.02,
+          "gradient": [
+            "#7c6bffff",
+            "#7c6bffff"
+          ]
         },
         "/amcl_pose": {
           "visible": true,
@@ -166,7 +196,7 @@
       },
       "publish": {
         "type": "pose",
-        "poseTopic": "/move_base_simple/goal",
+        "poseTopic": "/goal_pose",
         "pointTopic": "/clicked_point",
         "poseEstimateTopic": "/initialpose",
         "poseEstimateXDeviation": 0.5,
@@ -181,5 +211,15 @@
   "playbackConfig": {
     "speed": 1
   },
-  "layout": "3D!rosn2n"
+  "layout": {
+    "direction": "row",
+    "first": {
+      "first": "TransformTree!40b91l9",
+      "second": "Teleop!29bfchs",
+      "direction": "column",
+      "splitPercentage": 76.93588676103246
+    },
+    "second": "3D!rosn2n",
+    "splitPercentage": 32.2510689912888
+  }
 }

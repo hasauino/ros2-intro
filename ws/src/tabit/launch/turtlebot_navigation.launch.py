@@ -29,6 +29,7 @@ ROS_DISTRO = os.environ.get("ROS_DISTRO")
 
 
 def generate_launch_description():
+    package_dir = get_package_share_directory("tabit")
     use_sim_time = LaunchConfiguration("use_sim_time", default="false")
     map_dir = LaunchConfiguration(
         "map",
@@ -59,7 +60,7 @@ def generate_launch_description():
         )
 
     nav2_launch_file_dir = os.path.join(
-        get_package_share_directory("nav2_bringup"), "launch"
+        package_dir, "launch"
     )
 
     return LaunchDescription(
@@ -81,7 +82,7 @@ def generate_launch_description():
             ),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(
-                    [nav2_launch_file_dir, "/bringup_launch.py"]
+                    [nav2_launch_file_dir, "/nav_bringup.launch.py"]
                 ),
                 launch_arguments={
                     "map": map_dir,

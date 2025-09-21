@@ -2,7 +2,8 @@ import glob
 from setuptools import find_packages, setup
 
 package_name = "tabit"
-launch_files = glob.glob("launch/*")
+launch_files = glob.glob("launch/*.py")
+include_launch_files = glob.glob("launch/include/*")
 config_files = glob.glob("configs/*")
 
 setup(
@@ -13,6 +14,7 @@ setup(
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
         ("share/" + package_name, ["package.xml"]),
         ("share/" + package_name + "/launch", launch_files),
+        ("share/" + package_name + "/launch/include", include_launch_files),
         ("share/" + package_name + "/configs", config_files),
     ],
     install_requires=["setuptools"],

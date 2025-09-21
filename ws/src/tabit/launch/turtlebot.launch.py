@@ -132,6 +132,7 @@ def generate_launch_description():
                 os.path.join(
                     package_dir,
                     "launch",
+                    "include",
                     "turtlebot_navigation.launch.py",
                 )
             ),

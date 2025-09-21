@@ -59,9 +59,7 @@ def generate_launch_description():
             ),
         )
 
-    nav2_launch_file_dir = os.path.join(
-        package_dir, "launch"
-    )
+    nav2_launch_file_dir = os.path.join(package_dir, "launch", "include")
 
     return LaunchDescription(
         [

@@ -57,12 +57,7 @@
 - Publish a stamped twist msg
 
 ```bash
-ros2 topic pub /cmd_vel geometry_msgs/msg/TwistStamped "{
-  header: {
-    stamp: {sec: 0, nanosec: 0},
-    frame_id: 'base_link'
-  },
-  twist: {
+ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{
     linear: {x: 0.1, y: 0.0, z: 0.0},
     angular: {x: 0.0, y: 0.0, z: 0.3}
   }
@@ -74,7 +69,7 @@ ros2 topic pub /cmd_vel geometry_msgs/msg/TwistStamped "{
 - Keyboard teleop
 
 ```bash
-ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -p stamped:=true
+ros2 run teleop_twist_keyboard teleop_twist_keyboard
 ```
 
 

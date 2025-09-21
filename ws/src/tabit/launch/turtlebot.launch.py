@@ -91,13 +91,15 @@ def generate_launch_description():
     robot_description_path = os.path.join(
         webots_ros2_turtlebot_dir, "resource", "turtlebot_webots.urdf"
     )
-    ros2_control_params = os.path.join(webots_ros2_turtlebot_dir, "resource", "ros2control.yml")
+    ros2_control_params = os.path.join(
+        webots_ros2_turtlebot_dir, "resource", "ros2control.yml"
+    )
     use_twist_stamped = "ROS_DISTRO" in os.environ and (
         os.environ["ROS_DISTRO"] in ["rolling", "jazzy"]
     )
     if use_twist_stamped:
         mappings = [
-            ("/diffdrive_controller/cmd_vel", "/cmd_vel"),
+            ("/diffdrive_controller/cmd_vel", "/cmd_vel_stamped"),
             ("/diffdrive_controller/odom", "/odom"),
         ]
     else:
@@ -122,9 +124,7 @@ def generate_launch_description():
     # Navigation
     navigation_nodes = []
     os.environ["TURTLEBOT3_MODEL"] = "burger"
-    nav2_map = os.path.join(
-        package_dir, "configs", "turtlebot_map.yaml"
-    )
+    nav2_map = os.path.join(package_dir, "configs", "turtlebot_map.yaml")
     nav2_params = os.path.join(package_dir, "configs", "turtlebot_nav.yaml")
     if "turtlebot3_navigation2" in get_packages_with_prefixes():
         turtlebot_navigation = IncludeLaunchDescription(
@@ -167,6 +167,31 @@ def generate_launch_description():
         nodes_to_start=navigation_nodes + ros_control_spawners,
     )
 
+    launch_actions = [
+        webots,
+        webots._supervisor,
+        robot_state_publisher,
+        footprint_publisher,
+        turtlebot_driver,
+        waiting_nodes,
+        # This action will kill all nodes once the Webots simulation has exited
+        launch.actions.RegisterEventHandler(
+            event_handler=launch.event_handlers.OnProcessExit(
+                target_action=webots,
+                on_exit=[launch.actions.EmitEvent(event=launch.events.Shutdown())],
+            )
+        ),
+    ]
+
+    if use_twist_stamped:
+        twist_to_twist_stamped = Node(
+            package="tabit",
+            executable="twist_to_twist_stamped",
+            name="twist_to_twist_stamped",
+            output="screen",
+        )
+        launch_actions = [twist_to_twist_stamped] + launch_actions
+
     return LaunchDescription(
         [
             DeclareLaunchArgument(
@@ -177,18 +202,6 @@ def generate_launch_description():
             DeclareLaunchArgument(
                 "mode", default_value="realtime", description="Webots startup mode"
             ),
-            webots,
-            webots._supervisor,
-            robot_state_publisher,
-            footprint_publisher,
-            turtlebot_driver,
-            waiting_nodes,
-            # This action will kill all nodes once the Webots simulation has exited
-            launch.actions.RegisterEventHandler(
-                event_handler=launch.event_handlers.OnProcessExit(
-                    target_action=webots,
-                    on_exit=[launch.actions.EmitEvent(event=launch.events.Shutdown())],
-                )
-            ),
         ]
+        + launch_actions
     )

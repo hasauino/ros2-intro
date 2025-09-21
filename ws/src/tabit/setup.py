@@ -27,7 +27,7 @@ setup(
             "talker = tabit.01_talker:main",
             "listener = tabit.01_listener:main",
             "robot_commander = tabit.02_robot_commander:main",
-            "twist_stamped_to_twist = tabit.twist_stamped_2_twist:main",
+            "twist_to_twist_stamped = tabit.twist_to_twist_stamped:main",
         ],
     },
 )

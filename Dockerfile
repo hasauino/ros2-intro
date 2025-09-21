@@ -10,6 +10,8 @@ RUN apt update && apt install -y --no-install-recommends \
     ros-jazzy-rosbridge-suite \
     ros-jazzy-webots-ros2 \
     ros-jazzy-turtlebot3 \
+    nodejs \
+    npm \
     python3-colcon-common-extensions \
     netcat-openbsd lsof htop \
     && rm -rf /var/lib/apt/lists/*

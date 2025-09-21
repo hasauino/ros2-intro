@@ -1,0 +1,17 @@
+{
+  "name": "demo_js",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "talker": "node 01_talker.js",
+    "listener": "node 02_listener.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+,
+  "dependencies": {
+    "rclnodejs": "1.5.1"
+  }
+}

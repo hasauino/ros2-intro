@@ -347,3 +347,4 @@ ws/install/*
 ws/webots/*.wbt
 ws/webots/*.wbproj
 TODO
+**/node_modules/*

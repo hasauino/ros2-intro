@@ -24,13 +24,13 @@
     "3D!rosn2n": {
       "cameraState": {
         "perspective": false,
-        "distance": 16.29012499999991,
+        "distance": 20,
         "phi": 0.06381371406621925,
-        "thetaOffset": 89.98904474279101,
+        "thetaOffset": 90.83183155876503,
         "targetOffset": [
-          0.13409330644432024,
-          -0.7223308945979635,
-          0.00014919391674160886
+          0,
+          0,
+          0
         ],
         "target": [
           0,
@@ -49,7 +49,16 @@
       },
       "followMode": "follow-pose",
       "followTf": "map",
-      "scene": {},
+      "scene": {
+        "transforms": {
+          "visible": true,
+          "labelSize": 0.15,
+          "axisScale": 5,
+          "showLabel": true,
+          "lineWidth": 2.5,
+          "enablePreloading": false
+        }
+      },
       "transforms": {
         "frame:base_link": {
           "visible": true
@@ -106,7 +115,7 @@
           "visible": true
         },
         "frame:map": {
-          "visible": false
+          "visible": true
         }
       },
       "topics": {
@@ -149,18 +158,18 @@
           "lineWidth": 0.01
         },
         "/plan_smoothed": {
-          "visible": true
+          "visible": false
         },
         "/received_global_plan": {
           "visible": true,
-          "lineWidth": 0.02,
+          "lineWidth": 0.085,
           "gradient": [
-            "#7c6bffff",
-            "#7c6bffff"
+            "#0003ffff",
+            "#1e00ffff"
           ]
         },
         "/amcl_pose": {
-          "visible": true,
+          "visible": false,
           "showCovariance": true,
           "axisScale": 0.532,
           "covarianceColor": "#ff000057",
@@ -168,6 +177,22 @@
         },
         "/cost_cloud": {
           "visible": false
+        },
+        "/plan": {
+          "visible": false,
+          "gradient": [
+            "#ff0000ff",
+            "#ff0000ff"
+          ],
+          "lineWidth": 0.1
+        },
+        "/our_plan": {
+          "visible": true,
+          "gradient": [
+            "#ff0000ff",
+            "#ff0000ff"
+          ],
+          "lineWidth": 0.1
         }
       },
       "layers": {
@@ -195,7 +220,7 @@
         }
       },
       "publish": {
-        "type": "pose",
+        "type": "point",
         "poseTopic": "/goal_pose",
         "pointTopic": "/clicked_point",
         "poseEstimateTopic": "/initialpose",

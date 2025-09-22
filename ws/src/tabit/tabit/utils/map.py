@@ -11,7 +11,7 @@ class Map:
         self._subscription = node.create_subscription(
             OccupancyGrid, costmap_topic, self.update, 10
         )
-        self._plan_pub = node.create_publisher(Path, "/plan", 10)
+        self._plan_pub = node.create_publisher(Path, "/our_plan", 10)
 
     def update(self, msg: OccupancyGrid):
         self._map_msg = msg
@@ -143,16 +143,16 @@ def test_map(navigator):
     navigator.get_logger().info("ready ..")
 
     def goal_callback(msg):
-        x = msg.point.x
-        y = msg.point.y
-        navigator.get_logger().info(f"got goal {x:.2f}, {y:.2f} ")
-        occupied = navigator.map.is_occupied(x, y, navigator.tf_buffer)
-        if occupied is None:
-            navigator.get_logger().info(f"Goal ({x:.2f}, {y:.2f}) occupancy unknown.")
-        elif occupied:
-            navigator.get_logger().info(f"Goal ({x:.2f}, {y:.2f}) is OCCUPIED.")
-        else:
-            navigator.get_logger().info(f"Goal ({x:.2f}, {y:.2f}) is FREE.")
+        navigator.get_logger().info(f"Received goal: {msg.point.x}, {msg.point.y}")
+        start = [0.0, 0.0]
+        goal = [msg.point.x, msg.point.y]
+        navigator.get_logger().info(f"Planning from {start} to {goal}")
+        path = navigator.map.make_plan(start, goal)
+        navigator.get_logger().info("found path")
+        if path is None:
+            navigator.get_logger().info("No path found.")
+            return
+        navigator.map.publish_path(path)
 
     navigator.create_subscription(PointStamped, "/clicked_point", goal_callback, 10)
     rclpy.spin(navigator)

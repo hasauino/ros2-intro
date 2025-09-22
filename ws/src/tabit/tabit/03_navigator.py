@@ -1,23 +1,25 @@
 import rclpy
-from rclpy.node import Node
 from tf2_ros import Buffer, TransformListener
 
-from tabit.utils.map import Map, test_map
-from tabit.utils.robot import Robot, test_robot
+from tabit.utils.map import Map
+from tabit.utils.path_follower import PathFollower
+from tabit.utils.robot import Robot
 
 
-class Navigator(Node):
+class Navigator:
     def __init__(self):
-        super().__init__("navigator")
+        self.node = rclpy.create_node("navigator")
         self.tf_buffer = Buffer()
-        self._tf_listener = TransformListener(self.tf_buffer, self)
-        self.robot = Robot(self)
-        self.map = Map(self)
+        self._tf_listener = TransformListener(self.tf_buffer, self.node)
+        self.robot = Robot(self.node)
+        self.map = Map(self.node)
         self.wait_for_transform("odom", "base_link")
         self.wait_for_transform("map", "base_link")
+        self.path_follower = PathFollower(self.node, self.robot, self.map, self.tf_buffer)
+        self.node.get_logger().info("Navigator initialized 🚀")
 
     def wait_for_transform(self, target_frame, source_frame):
-        self.get_logger().info(
+        self.node.get_logger().info(
             f"Waiting for transform {target_frame} -> {source_frame}"
         )
         while not self.tf_buffer.can_transform(
@@ -25,14 +27,20 @@ class Navigator(Node):
             source_frame,
             rclpy.time.Time(),
         ):
-            rclpy.spin_once(self)
+            rclpy.spin_once(self.node)
+
+    def spin(self):
+        rclpy.spin(self.node)
+
+    def destroy(self):
+        self.node.destroy_node()
 
 
 def main():
     rclpy.init(args=None)
     navigator = Navigator()
-    test_map(navigator)
-    # test_robot(navigator)
+    navigator.spin()
+    navigator.destroy()
 
 
 if __name__ == "__main__":

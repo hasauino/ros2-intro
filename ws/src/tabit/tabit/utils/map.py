@@ -115,12 +115,12 @@ class Map:
                     queue.append(((nx, ny), path + [(nx, ny)]))
         return None
 
-    def publish_path(self, path):
+    def to_path_msg(self, path):
         """
-        Publishes a nav_msgs/Path message from a list of [x, y] points.
+        Converts a list of [x, y] points to a nav_msgs/Path message.
         """
         if not path or self._map_msg is None:
-            return
+            return None
         map_info = self._map_msg.info
         path_msg = Path()
         path_msg.header.stamp = self._node.get_clock().now().to_msg()
@@ -136,7 +136,10 @@ class Map:
             pose.pose.position.z = 0.0
             pose.pose.orientation.w = 1.0
             path_msg.poses.append(pose)
-        self._plan_pub.publish(path_msg)
+        return path_msg
+
+    def publish_path(self, path):
+        self._plan_pub.publish(self.to_path_msg(path))
 
 
 def test_map(navigator):
@@ -150,7 +153,7 @@ def test_map(navigator):
         path = navigator.map.make_plan(start, goal)
         navigator.get_logger().info("found path")
         if path is None:
-            navigator.get_logger().info("No path found.")
+            navigator.get_logger().info("No path found 😞")
             return
         navigator.map.publish_path(path)
 

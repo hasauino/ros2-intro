@@ -348,3 +348,4 @@ ws/webots/*.wbt
 ws/webots/*.wbproj
 TODO
 **/node_modules/*
+**/playground.ipynb

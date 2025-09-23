@@ -5,11 +5,17 @@ from rclpy.node import Node
 
 
 class Map:
-    def __init__(self, node: Node, costmap_topic: str = "/global_costmap/costmap"):
+    def __init__(
+        self, node: Node, group, costmap_topic: str = "/global_costmap/costmap"
+    ):
         self._node = node
         self._map_msg = None
         self._subscription = node.create_subscription(
-            OccupancyGrid, costmap_topic, self.update, 10
+            OccupancyGrid,
+            costmap_topic,
+            self.update,
+            10,
+            callback_group=group,
         )
         self._plan_pub = node.create_publisher(Path, "/our_plan", 10)
 
@@ -139,7 +145,7 @@ class Map:
         return path_msg
 
     def publish_path(self, path):
-        self._plan_pub.publish(self.to_path_msg(path))
+        self._plan_pub.publish(path)
 
 
 def test_map(navigator):

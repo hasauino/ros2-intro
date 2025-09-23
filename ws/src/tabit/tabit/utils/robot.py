@@ -2,7 +2,7 @@ import rclpy
 import tf2_ros
 from geometry_msgs.msg import TransformStamped, Twist
 from rclpy.node import Node
-from tf2_ros import TransformBroadcaster
+from tf2_ros import TransformBroadcaster, Buffer
 
 from tabit.utils.helpers import transform_stamped_to_pose_stamped
 
@@ -14,12 +14,23 @@ class Pose2D:
 
 
 class Robot:
-    def __init__(self, node: Node, pull_distance: float = 0.2):
+    def __init__(
+        self,
+        node: Node,
+        group,
+        tf_buffer: Buffer,
+        pull_distance: float = 0.2,
+        max_speed: float = 0.5,
+    ):
         self._node = node
         self._cmd_publisher = self._node.create_publisher(Twist, "cmd_vel", 10)
         self._pull_distance = pull_distance
+        self._max_speed = max_speed
         self.tf_broadcaster = TransformBroadcaster(self._node)
-        self.timer = self._node.create_timer(0.01, self.broadcast_timer_callback)
+        self.timer = self._node.create_timer(
+            0.01, self.broadcast_timer_callback, callback_group=group
+        )
+        self.tf_buffer = tf_buffer
 
     def broadcast_timer_callback(self):
         t = TransformStamped()
@@ -36,20 +47,28 @@ class Robot:
         self.tf_broadcaster.sendTransform(t)
 
     def move(self, linear: float, angular: float):
+        max_reached = False
         msg = Twist()
-        msg.linear.x = linear
-        msg.angular.z = angular
+        msg.linear.x = (
+            min(linear, self._max_speed)
+            if linear >= 0
+            else max(linear, -self._max_speed)
+        )
+        if abs(msg.linear.x) >= self._max_speed:
+            max_reached = True
+        msg.angular.z = min(angular, 0.3) if angular >= 0 else max(angular, -0.3)
         self._cmd_publisher.publish(msg)
+        return max_reached
 
     def move_from_pull_point(self, v_pull_x: float, v_pull_y: float):
         vx = v_pull_x
         omega = v_pull_y / self._pull_distance
-        self.move(vx, omega)
+        return self.move(vx, omega)
 
     def get_pose(self):
         try:
             # Try to lookup transform from 'odom' to 'base_link'
-            trans = self._node.tf_buffer.lookup_transform(
+            trans = self.tf_buffer.lookup_transform(
                 "odom",
                 "base_link",
                 rclpy.time.Time(),
@@ -66,7 +85,7 @@ class Robot:
     def get_pull_point(self):
         try:
             # Lookup transform from 'odom' to 'pull_point'
-            trans = self._node.tf_buffer.lookup_transform(
+            trans = self.tf_buffer.lookup_transform(
                 "odom",
                 "pull_point",
                 rclpy.time.Time(),

@@ -23,16 +23,15 @@
     },
     "3D!rosn2n": {
       "cameraState": {
-        "perspective": false,
         "distance": 20,
+        "perspective": false,
         "phi": 0.06381371406621925,
-        "thetaOffset": 90.83183155876503,
-        "targetOffset": [
+        "target": [
           0,
           0,
           0
         ],
-        "target": [
+        "targetOffset": [
           0,
           0,
           0
@@ -43,6 +42,7 @@
           0,
           1
         ],
+        "thetaOffset": 90.83183155876503,
         "fovy": 45,
         "near": 0.5,
         "far": 5000
@@ -116,6 +116,9 @@
         },
         "frame:map": {
           "visible": true
+        },
+        "frame:pull_point": {
+          "visible": false
         }
       },
       "topics": {

@@ -1,7 +1,9 @@
 import numpy as np
+import rclpy
 import tf2_geometry_msgs
 from geometry_msgs.msg import PointStamped, PoseStamped
 from nav_msgs.msg import Path
+from rclpy.duration import Duration
 
 
 class PathFollower:
@@ -24,7 +26,8 @@ class PathFollower:
 
     def callback(self, msg):
         start = self.robot.get_pull_point()
-        start = self.tf_buffer.transform(start, "map")
+        start.header.stamp = rclpy.time.Time()
+        start = self.tf_buffer.transform(start, "map", timeout=Duration(seconds=5.0))
         start = [start.pose.position.x, start.pose.position.y]
         goal = [msg.point.x, msg.point.y]
         path = self.map.make_plan(start, goal)
@@ -37,11 +40,22 @@ class PathFollower:
         self.follow(path)
 
     def follow(self, path: Path):
+        def is_last_pose(index):
+            return index == len(path.poses) - 1
+
         goal = path.poses[-1]
         pose_index = 0
-        while not self.is_goal_reached(goal) or pose_index < len(path.poses):
+        has_reached_goal = False
+        while not has_reached_goal and rclpy.ok():
+            rclpy.spin_once(self.node)
             pose = path.poses[pose_index]
             ex, ey = self.get_error(pose)
+            if np.linalg.norm(self.get_error(goal)) < self.tolerance or is_last_pose(
+                pose_index
+            ):
+                has_reached_goal = True
+                self.logger.info("Goal reached 🎉")
+                break
             self.robot.move_from_pull_point(
                 self.proportional_gain * ex, self.proportional_gain * ey
             )
@@ -75,6 +89,10 @@ class PathFollower:
         path_odom.header.stamp = path.header.stamp
         path_odom.header.frame_id = target_frame
         for pose in path.poses:
-            pose_odom = self.tf_buffer.transform(pose, target_frame)
+            pose_odom = self.tf_buffer.transform(
+                pose,
+                target_frame,
+                timeout=Duration(seconds=1.0),
+            )
             path_odom.poses.append(pose_odom)
         return path_odom

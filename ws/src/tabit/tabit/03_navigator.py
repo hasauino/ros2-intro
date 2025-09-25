@@ -1,11 +1,10 @@
 import rclpy
-from rclpy.executors import MultiThreadedExecutor
+from rclpy.callback_groups import ReentrantCallbackGroup
 from tf2_ros import Buffer, TransformListener
 
 from tabit.utils.map import Map
 from tabit.utils.path_follower import PathFollower
 from tabit.utils.robot import Robot
-from rclpy.callback_groups import ReentrantCallbackGroup
 
 
 class Navigator:
@@ -48,10 +47,10 @@ class Navigator:
 def main():
     rclpy.init(args=None)
     navigator = Navigator()
-    executor = MultiThreadedExecutor()
-    executor.add_node(navigator.node)
-    executor.spin()
+    while rclpy.ok():
+        navigator.spin_once()
     navigator.destroy()
+    rclpy.shutdown()
 
 
 if __name__ == "__main__":

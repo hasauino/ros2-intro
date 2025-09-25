@@ -1,16 +1,11 @@
+import numpy as np
 import rclpy
-import tf2_ros
-from geometry_msgs.msg import TransformStamped, Twist
+from geometry_msgs.msg import Twist
+from nav_msgs.msg import Odometry
 from rclpy.node import Node
-from tf2_ros import TransformBroadcaster, Buffer
+from time import sleep
 
-from tabit.utils.helpers import transform_stamped_to_pose_stamped
-
-
-class Pose2D:
-    def __init__(self, x, y, theta):
-        self.position = {"x": x, "y": y}
-        self.orientation = theta
+from tabit.utils.helpers import odom_to_pose_stamped
 
 
 class Robot:
@@ -18,33 +13,29 @@ class Robot:
         self,
         node: Node,
         group,
-        tf_buffer: Buffer,
         pull_distance: float = 0.2,
         max_speed: float = 0.5,
     ):
-        self._node = node
-        self._cmd_publisher = self._node.create_publisher(Twist, "cmd_vel", 10)
-        self._pull_distance = pull_distance
+        self.node = node
+        self._cmd_publisher = self.node.create_publisher(Twist, "cmd_vel", 10)
+        self.pull_distance = pull_distance
         self._max_speed = max_speed
-        self.tf_broadcaster = TransformBroadcaster(self._node)
-        self.timer = self._node.create_timer(
-            0.01, self.broadcast_timer_callback, callback_group=group
-        )
-        self.tf_buffer = tf_buffer
 
-    def broadcast_timer_callback(self):
-        t = TransformStamped()
-        t.header.stamp = self._node.get_clock().now().to_msg()
-        t.header.frame_id = "base_link"
-        t.child_frame_id = "pull_point"
-        t.transform.translation.x = self._pull_distance
-        t.transform.translation.y = 0.0
-        t.transform.translation.z = 0.0
-        t.transform.rotation.x = 0.0
-        t.transform.rotation.y = 0.0
-        t.transform.rotation.z = 0.0
-        t.transform.rotation.w = 1.0
-        self.tf_broadcaster.sendTransform(t)
+        # Odometry subscriber and storage variables
+        self.odom = None
+        self.odom_subscriber = self.node.create_subscription(
+            Odometry,
+            "/odom",
+            self.odom_callback,
+            10,
+            callback_group=group,
+        )
+
+    def wait_until_ready(self):
+        self.logger.info("Waiting for initial odometry...")
+        while rclpy.ok() and self.odom is None:
+            rclpy.spin_once(self.node)
+        self.logger.info("Initial odometry received.")
 
     def move(self, linear: float, angular: float):
         max_reached = False
@@ -62,50 +53,75 @@ class Robot:
 
     def move_from_pull_point(self, v_pull_x: float, v_pull_y: float):
         vx = v_pull_x
-        omega = v_pull_y / self._pull_distance
+        omega = v_pull_y / self.pull_distance
         return self.move(vx, omega)
 
     def get_pose(self):
-        try:
-            # Try to lookup transform from 'odom' to 'base_link'
-            trans = self.tf_buffer.lookup_transform(
-                "odom",
-                "base_link",
-                rclpy.time.Time(),
-            )
-            return transform_stamped_to_pose_stamped(trans)
-        except (
-            tf2_ros.LookupException,
-            tf2_ros.ConnectivityException,
-            tf2_ros.ExtrapolationException,
-        ) as e:
-            self._node.get_logger().warn(f"TF lookup failed: {e}")
+        if self.odom is None:
             return None
+        return odom_to_pose_stamped(self.odom)
 
     def get_pull_point(self):
-        try:
-            # Lookup transform from 'odom' to 'pull_point'
-            trans = self.tf_buffer.lookup_transform(
-                "odom",
-                "pull_point",
-                rclpy.time.Time(),
-            )
-            return transform_stamped_to_pose_stamped(trans)
-        except (
-            tf2_ros.LookupException,
-            tf2_ros.ConnectivityException,
-            tf2_ros.ExtrapolationException,
-        ) as e:
-            self._node.get_logger().warn(f"TF lookup failed for pull_point: {e}")
+        if self.odom is None:
             return None
+        return odom_to_pose_stamped(self.odom)
+
+    @property
+    def odom_R_base(self):
+        """
+        2x2 rotation matrix that transforms a 2D position vector from base to odom.
+        """
+        cos_theta = np.cos(self.theta)
+        sin_theta = np.sin(self.theta)
+
+        # Rotation matrix from base to odom
+        return [
+            [cos_theta, -sin_theta],
+            [sin_theta, cos_theta],
+        ]
+
+    @property
+    def base_R_odom(self):
+        """
+        2x2 rotation matrix that transforms a 2D position vector from base to odom.
+        """
+        return np.transpose(self.odom_R_base)
+
+    @property
+    def x(self):
+        if self.odom is None:
+            return None
+        return self.odom.pose.pose.position.x
+
+    @property
+    def y(self):
+        if self.odom is None:
+            return None
+        return self.odom.pose.pose.position.y
+
+    @property
+    def theta(self):
+        if self.odom is None:
+            return None
+        orientation_q = self.odom.pose.pose.orientation
+        # Convert quaternion to yaw angle (rotation around z-axis)
+        siny_cosp = 2 * (
+            orientation_q.w * orientation_q.z + orientation_q.x * orientation_q.y
+        )
+        cosy_cosp = 1 - 2 * (
+            orientation_q.y * orientation_q.y + orientation_q.z * orientation_q.z
+        )
+        return np.arctan2(siny_cosp, cosy_cosp)
+
+    @property
+    def logger(self):
+        return self.node.get_logger()
+
+    def odom_callback(self, msg):
+        self.odom = msg
 
     def __repr__(self):
-        # return info about x,y location and vx and omega
-        pose = self.get_pose()
-        if pose:
-            return f"Robot Pose - x: {pose.position['x']:.2f}, y: {pose.position['y']:.2f}, theta: {pose.orientation:.2f}"
-        else:
-            return "Robot Pose - Unknown"
+        return f"Robot Pose: x: {self.x:.2f}, y: {self.y:.2f}, theta: {self.theta:.2f}"
 
 
 def test_robot(navigator):
@@ -116,5 +132,5 @@ def test_robot(navigator):
         r = 0.5  # Radius in m
         omega = v / r  # Angular velocity in rad/s
         robot.move(v, omega)
-        navigator.get_logger().info(str(robot))
-        rclpy.spin_once(navigator)
+        navigator.node.get_logger().info(str(robot))
+        navigator.spin_once()

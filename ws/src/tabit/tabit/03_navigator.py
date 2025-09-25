@@ -14,7 +14,8 @@ class Navigator:
         self.group = ReentrantCallbackGroup()
         self.tf_buffer = Buffer()
         self._tf_listener = TransformListener(self.tf_buffer, self.node)
-        self.robot = Robot(self.node, self.group, self.tf_buffer)
+        self.robot = Robot(self.node, self.group)
+        self.robot.wait_until_ready()
         self.map = Map(self.node, group=self.group)
         self.wait_for_transform("odom", "base_link")
         self.wait_for_transform("map", "base_link")
@@ -33,6 +34,9 @@ class Navigator:
             rclpy.time.Time(),
         ):
             rclpy.spin_once(self.node)
+
+    def spin_once(self):
+        rclpy.spin_once(self.node)
 
     def spin(self):
         rclpy.spin(self.node)

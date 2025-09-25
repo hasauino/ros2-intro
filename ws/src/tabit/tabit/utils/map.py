@@ -1,4 +1,3 @@
-import rclpy
 from geometry_msgs.msg import PointStamped, PoseStamped
 from nav_msgs.msg import OccupancyGrid, Path
 from rclpy.node import Node
@@ -149,19 +148,21 @@ class Map:
 
 
 def test_map(navigator):
-    navigator.get_logger().info("ready ..")
+    navigator.node.get_logger().info("ready ..")
 
     def goal_callback(msg):
-        navigator.get_logger().info(f"Received goal: {msg.point.x}, {msg.point.y}")
+        navigator.node.get_logger().info(f"Received goal: {msg.point.x}, {msg.point.y}")
         start = [0.0, 0.0]
         goal = [msg.point.x, msg.point.y]
-        navigator.get_logger().info(f"Planning from {start} to {goal}")
+        navigator.node.get_logger().info(f"Planning from {start} to {goal}")
         path = navigator.map.make_plan(start, goal)
-        navigator.get_logger().info("found path")
+        navigator.node.get_logger().info("found path")
         if path is None:
-            navigator.get_logger().info("No path found 😞")
+            navigator.node.get_logger().info("No path found 😞")
             return
         navigator.map.publish_path(path)
 
-    navigator.create_subscription(PointStamped, "/clicked_point", goal_callback, 10)
-    rclpy.spin(navigator)
+    navigator.node.create_subscription(
+        PointStamped, "/clicked_point", goal_callback, 10
+    )
+    navigator.spin()

@@ -1,9 +1,7 @@
-import rclpy
+import numpy as np
 import tf2_geometry_msgs
 from geometry_msgs.msg import PointStamped, PoseStamped
 from nav_msgs.msg import Path
-
-from tabit.utils.helpers import norm
 
 
 class PathFollower:
@@ -44,26 +42,33 @@ class PathFollower:
         while not self.is_goal_reached(goal) or pose_index < len(path.poses):
             pose = path.poses[pose_index]
             ex, ey = self.get_error(pose)
-            self.logger.info(f"error [{ex}, {ey}]")
             self.robot.move_from_pull_point(
                 self.proportional_gain * ex, self.proportional_gain * ey
             )
-            if norm([ex, ey]) < self.robot.pull_distance:
+            if np.linalg.norm([ex, ey]) < self.robot.pull_distance:
                 pose_index += 1
         self.robot.move(0.0, 0.0)
 
     def is_goal_reached(self, goal: PoseStamped):
-        return norm(self.get_error(goal)) < self.tolerance
+        return np.linalg.norm(self.get_error(goal)) < self.tolerance
 
     @staticmethod
     def norm(point_2d):
         x, y = point_2d
         return (x**2 + y**2) ** 0.5
 
-    def get_error(self, setpoint: PoseStamped):
-        setpoint.header.stamp = rclpy.time.Time()
-        trans = self.tf_buffer.transform(setpoint, "pull_point")
-        return trans.pose.position.x, trans.pose.position.y
+    def get_error(self, setpoint_odom: PoseStamped):
+        robot_position = np.array([self.robot.x, self.robot.y])
+        setpoint_position = np.array(
+            [setpoint_odom.pose.position.x, setpoint_odom.pose.position.y]
+        )
+
+        # error vector represented in odom frame
+        error_odom = setpoint_position - robot_position
+
+        # error vector in robot base frame
+        error_base = self.robot.base_R_odom.dot(error_odom)
+        return error_base
 
     def transform_path_to(self, path: Path, target_frame: str) -> Path:
         path_odom = Path()

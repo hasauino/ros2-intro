@@ -1,4 +1,5 @@
 from geometry_msgs.msg import PoseStamped, TransformStamped
+import numpy as np
 
 
 def transform_stamped_to_pose_stamped(transform: TransformStamped) -> PoseStamped:
@@ -14,6 +15,8 @@ def transform_stamped_to_pose_stamped(transform: TransformStamped) -> PoseStampe
     return pose_stamped
 
 
-
-def norm(vector) -> float:
-    return sum(x**2 for x in vector) ** 0.5
+def odom_to_pose_stamped(odom) -> PoseStamped:
+    pose_stamped = PoseStamped()
+    pose_stamped.header = odom.header
+    pose_stamped.pose = odom.pose.pose
+    return pose_stamped

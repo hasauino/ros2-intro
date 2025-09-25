@@ -12,3 +12,8 @@ def transform_stamped_to_pose_stamped(transform: TransformStamped) -> PoseStampe
     pose_stamped.pose.orientation.z = transform.transform.rotation.z
     pose_stamped.pose.orientation.w = transform.transform.rotation.w
     return pose_stamped
+
+
+
+def norm(vector) -> float:
+    return sum(x**2 for x in vector) ** 0.5

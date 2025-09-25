@@ -3,6 +3,8 @@ import tf2_geometry_msgs
 from geometry_msgs.msg import PointStamped, PoseStamped
 from nav_msgs.msg import Path
 
+from tabit.utils.helpers import norm
+
 
 class PathFollower:
     def __init__(self, node, group, robot, map, tf_buffer):
@@ -46,12 +48,12 @@ class PathFollower:
             self.robot.move_from_pull_point(
                 self.proportional_gain * ex, self.proportional_gain * ey
             )
-            if self.norm([ex, ey]) < 0.5:
+            if norm([ex, ey]) < self.robot.pull_distance:
                 pose_index += 1
         self.robot.move(0.0, 0.0)
 
     def is_goal_reached(self, goal: PoseStamped):
-        return self.norm(self.get_error(goal)) < self.tolerance
+        return norm(self.get_error(goal)) < self.tolerance
 
     @staticmethod
     def norm(point_2d):

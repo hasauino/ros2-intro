@@ -1,5 +1,4 @@
 from geometry_msgs.msg import PoseStamped, TransformStamped
-import numpy as np
 
 
 def transform_stamped_to_pose_stamped(transform: TransformStamped) -> PoseStamped:

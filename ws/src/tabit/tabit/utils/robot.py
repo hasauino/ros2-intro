@@ -3,7 +3,6 @@ import rclpy
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 from rclpy.node import Node
-from time import sleep
 
 from tabit.utils.helpers import odom_to_pose_stamped
 

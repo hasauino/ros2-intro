@@ -13,8 +13,10 @@ RUN apt update && apt install -y --no-install-recommends \
     nodejs \
     npm \
     ipython3 \
-    jupyter jupyter-notebook \
-    jupyter jupyter-notebook \
+    jupyter \
+    jupyter-notebook \
+    python3-numpy \
+    python3-opencv \
     python3-colcon-common-extensions \
     netcat-openbsd lsof htop \
     && rm -rf /var/lib/apt/lists/*

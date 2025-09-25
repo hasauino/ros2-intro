@@ -17,7 +17,11 @@ setup(
         ("share/" + package_name + "/launch/include", include_launch_files),
         ("share/" + package_name + "/configs", config_files),
     ],
-    install_requires=["setuptools"],
+    install_requires=[
+        "setuptools",
+        "numpy",
+        "opencv-python",
+    ],
     zip_safe=True,
     maintainer="ros",
     maintainer_email="ros@todo.todo",

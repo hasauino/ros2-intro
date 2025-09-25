@@ -31,7 +31,18 @@
   ros@xxxxx:~$ ros2 --help
   ```
 
-  
+
+
+## **🏗️** Build
+
+- Local ROS packages need to be build before they are used (even Python packages)
+
+```bash
+cd ~/ros2_ws/
+colcon build --symlink-install
+```
+
+
 
 ## 🤖 Simulation
 
@@ -82,7 +93,7 @@ Got to  :file_folder: [demo_js](ws/src/demo_js)
 
 
 
-## CLI
+## > CLI
 
 - echo a topic
 

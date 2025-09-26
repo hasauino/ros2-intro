@@ -15,3 +15,6 @@ services:
       - ./ws:/home/ros/ros2_ws
     stdin_open: true
     tty: true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+ 

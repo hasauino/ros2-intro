@@ -122,6 +122,11 @@ ros2 run teleop_twist_keyboard teleop_twist_keyboard
 
 - Compact doc for **rclpy**: [rclpy_concise_docs.md](docs/rclpy_concise_docs.md)
 - CLI Cheat [sheet](docs/cheat_sheet.md)
+- ROS msg types:
+    - [std_msgs](https://docs.ros.org/en/noetic/api/std_msgs/html/index-msg.html): String, Bool, Empty, Float32, ...
+    - [geometry_msgs](https://docs.ros.org/en/noetic/api/geometry_msgs/html/index-msg.html): Point, Pose, Twist, ...
+    - [nav_msgs](https://docs.ros.org/en/noetic/api/nav_msgs/html/index-msg.html): Odometry, Path, OccupancyGrid, ...
+
 - **Examples**
     - [Python](https://github.com/ros2/examples/tree/jazzy/rclpy/topics)
 

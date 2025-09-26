@@ -36,5 +36,6 @@ sudo apt install -y --no-install-recommends \
 echo "export ROS_DOMAIN_ID=0" >> ~/.bashrc
 echo "export TURTLEBOT3_MODEL=burger" >> ~/.bashrc
 echo "export WEBOTS_HOST=0.0.0.0" >> ~/.bashrc
+echo "export WEBOTS_HOME=/mnt/c/Users/${USER}/AppData/Local/Programs/Webots/" >> ~/.bashrc
 
 echo "source /home/ros/ros2_ws/install/setup.bash" >> ~/.bashrc

@@ -120,8 +120,8 @@ ros2 run teleop_twist_keyboard teleop_twist_keyboard
 
 ## :link: Links
 
-- Compact doc for **rclpy**: [rclpy_concise_docs.md](rclpy_concise_docs.md)
-- CLI Cheat [sheet](cheat_sheet.md)
+- Compact doc for **rclpy**: [rclpy_concise_docs.md](docs/rclpy_concise_docs.md)
+- CLI Cheat [sheet](docs/cheat_sheet.md)
 - **Examples**
     - [Python](https://github.com/ros2/examples/tree/jazzy/rclpy/topics)
 

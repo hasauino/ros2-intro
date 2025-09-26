@@ -1,11 +1,17 @@
-from geometry_msgs.msg import PointStamped, PoseStamped
+from collections import deque
+
+from geometry_msgs.msg import PoseStamped
 from nav_msgs.msg import OccupancyGrid, Path
+from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.node import Node
 
 
 class Map:
     def __init__(
-        self, node: Node, group, costmap_topic: str = "/global_costmap/costmap"
+        self,
+        node: Node,
+        group=ReentrantCallbackGroup(),
+        costmap_topic: str = "/global_costmap/costmap",
     ):
         self._node = node
         self._map_msg = None
@@ -21,33 +27,27 @@ class Map:
     def update(self, msg: OccupancyGrid):
         self._map_msg = msg
 
-    def is_occupied(self, x: float, y: float, timeout=1.0):
-        """
-        Checks occupancy at (x, y) in odom frame.
-        Transforms to map frame and checks occupancy value.
-        Returns True if occupied, False if free, None if unknown.
-        """
+    def is_occupied(self, x: float, y: float) -> bool | None:
         if self._map_msg is None:
             return None
 
         # Convert map coordinates to grid indices
         mx, my = self.to_grid((x, y))
 
-        if (
-            mx < 0
-            or my < 0
-            or mx >= self._map_msg.info.width
-            or my >= self._map_msg.info.height
-        ):
-            return None
+        # TODO [3]: convert x,y indices to a single index in the 1D data array
+        # and return True if occupied (value > 50), False if free (value < 50),
+        # and None if unknown (value == -1) or out of bounds
+        return None
 
-        idx = my * self._map_msg.info.width + mx
-        value = self._map_msg.data[idx]
-        if value == -1:
-            return None
-        return value > 50  # threshold for occupancy
+    def is_free(self, mx: int, my: int) -> bool:
+        result = not self.is_occupied(mx, my)
+
+        # consider unknown cells as free cells for path planning
+        return True if result is None else result
 
     def to_grid(self, pt):
+        """
+        Converts world coordinates (x, y) in meters to grid indices (mx, my)."""
         map_info = self._map_msg.info
         resolution = map_info.resolution
         origin_x = map_info.origin.position.x
@@ -58,6 +58,9 @@ class Map:
         return mx, my
 
     def to_world(self, mx, my):
+        """
+        Converts grid indices (mx, my) to world coordinates (x, y) in meters
+        """
         map_info = self._map_msg.info
         resolution = map_info.resolution
         origin_x = map_info.origin.position.x
@@ -66,7 +69,9 @@ class Map:
         y = my * resolution + origin_y
         return [x, y]
 
-    def make_plan(self, start, goal):
+    def make_plan(
+        self, start: list[float], goal: list[float]
+    ) -> list[list[float]] | None:
         """
         Finds a path from start to goal using BFS. Returns a list of [x, y] points.
         start, goal: [x, y] in map coordinates (meters)
@@ -76,49 +81,27 @@ class Map:
         map_info = self._map_msg.info
         width, height = map_info.width, map_info.height
 
-        start_idx = self.to_grid(start)
-        goal_idx = self.to_grid(goal)
+        start_idx = self.to_grid(start)  # (mx, my) of start point
+        goal_idx = self.to_grid(goal)  # (mx, my) of goal point
 
         if not (0 <= start_idx[0] < width and 0 <= start_idx[1] < height):
             return None
         if not (0 <= goal_idx[0] < width and 0 <= goal_idx[1] < height):
             return None
 
-        def is_free(mx, my):
-            if mx < 0 or my < 0 or mx >= width or my >= height:
-                return False
-            idx = my * width + mx
-            value = self._map_msg.data[idx]
-            return value >= 0 and value < 50
-
-        from collections import deque
-
-        queue = deque()
-        queue.append((start_idx, [start_idx]))
-        visited = set()
-        visited.add(start_idx)
-
-        directions = [
-            (1, 0),
-            (-1, 0),
-            (0, 1),
-            (0, -1),
-            (1, 1),
-            (1, -1),
-            (-1, 1),
-            (-1, -1),
-        ]
-
-        while queue:
-            (mx, my), path = queue.popleft()
-            if (mx, my) == goal_idx:
-                return [self.to_world(x, y) for x, y in path]
-            for dx, dy in directions:
-                nx, ny = mx + dx, my + dy
-                if (nx, ny) not in visited and is_free(nx, ny):
-                    visited.add((nx, ny))
-                    queue.append(((nx, ny), path + [(nx, ny)]))
+        # TODO [4]: Implement BFS to find the shortest path from start_idx to goal_idx
+        # You can use a queue (collections.deque) to explore the grid
+        # and a set to keep track of visited nodes.
+        # Return the path as a list of [x, y] points.
         return None
+
+    def publish_path(self, path: Path):
+        """
+        Publishes the path on "our_plan" topic. Path is of type nav_msgs/Path.
+        You can use the to_path_msg() function to convert a list of [x, y] points
+        to a Path message.
+        """
+        self._plan_pub.publish(path)
 
     def to_path_msg(self, path):
         """
@@ -142,27 +125,3 @@ class Map:
             pose.pose.orientation.w = 1.0
             path_msg.poses.append(pose)
         return path_msg
-
-    def publish_path(self, path):
-        self._plan_pub.publish(path)
-
-
-def test_map(navigator):
-    navigator.node.get_logger().info("ready ..")
-
-    def goal_callback(msg):
-        navigator.node.get_logger().info(f"Received goal: {msg.point.x}, {msg.point.y}")
-        start = [0.0, 0.0]
-        goal = [msg.point.x, msg.point.y]
-        navigator.node.get_logger().info(f"Planning from {start} to {goal}")
-        path = navigator.map.make_plan(start, goal)
-        navigator.node.get_logger().info("found path")
-        if path is None:
-            navigator.node.get_logger().info("No path found 😞")
-            return
-        navigator.map.publish_path(path)
-
-    navigator.node.create_subscription(
-        PointStamped, "/clicked_point", goal_callback, 10
-    )
-    navigator.spin()

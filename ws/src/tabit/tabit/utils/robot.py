@@ -121,15 +121,3 @@ class Robot:
 
     def __repr__(self):
         return f"Robot Pose: x: {self.x:.2f}, y: {self.y:.2f}, theta: {self.theta:.2f}"
-
-
-def test_robot(navigator):
-    robot = navigator.robot
-
-    while rclpy.ok():
-        v = 0.2  # Linear velocity in m/s
-        r = 0.5  # Radius in m
-        omega = v / r  # Angular velocity in rad/s
-        robot.move(v, omega)
-        navigator.node.get_logger().info(str(robot))
-        navigator.spin_once()

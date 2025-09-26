@@ -4,15 +4,22 @@
 
 ## 🛠️ Prep 
 
-:warning: If you are on Windows, please check the `windows` branch. (not yet ready, will ping in the chat when it's ready).
-
 - Clone the repo
 
-- Add `dox` bash alias so we can quickly enter ros2 container
+- Install WSL2: make sure you are using Ubuntu 24 with it.
+   - [instructions](https://learn.microsoft.com/en-us/windows/wsl/install) for installing WSL
 
+   - make sure you use Ubuntu 24 with it.
+
+- Enter WSL
   ```bash
-  echo 'alias dox="docker exec -it rosws /bin/bash"' >> ~/.bashrc
+  wsl
   ```
+- Then execute the `setup.sh` script located in repo root
+
+```bash
+./setup.sh
+```
 
 - Install [Webots](https://cyberbotics.com/#download) (latest version - R2025a) simulator on the host (not inside docker). 
 

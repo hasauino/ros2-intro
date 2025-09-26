@@ -34,7 +34,7 @@ setup(
             "listener = tabit.01_listener:main",
             "robot_commander = tabit.02_robot_commander:main",
             "navigator = tabit.03_navigator:main",
-            "task1 = tabit.exercise:main",
+            "exercise = tabit.exercise:main",
             "twist_to_twist_stamped = tabit.utils.twist_to_twist_stamped:main",
         ],
     },

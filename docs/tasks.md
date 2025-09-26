@@ -47,7 +47,7 @@
   - **TODO [2]**
 
 - Use [Foxglove ](https://app.foxglove.dev/) to publish the point.
-- Run it using `ros2 run` command
+- Run it using `ros2 run tabit exercise` command
 
 
 

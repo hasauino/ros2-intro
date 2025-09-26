@@ -4,6 +4,8 @@
 
 ## 🛠️ Prep 
 
+:warning: If you are on Windows, please check the `windows` branch. (not yet ready, will ping in the chat when it's ready).
+
 - Clone the repo
 
 - Add `dox` bash alias so we can quickly enter ros2 container

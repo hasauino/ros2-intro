@@ -35,7 +35,7 @@
 
 - Open Webots from host. Open the file generated inside `ws/webots`
 
-- Open  [Foxglove ](https://app.foxglove.dev/) in your browser. Import the config file `ws/src/tabit/configs/turtlebot_foxglove.json`
+- Open rviz in another terminal.
 
 
 
@@ -46,7 +46,7 @@
   - **TODO [1]**
   - **TODO [2]**
 
-- Use [Foxglove ](https://app.foxglove.dev/) to publish the point.
+- Use rviz to publish the point.
 - Run it using `ros2 run tabit exercise` command
 
 

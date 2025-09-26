@@ -27,27 +27,35 @@
 
 ## :rocket: Getting Started
 
-- Start docker container
-
+- Enter WSL
   ```bash
-  docker-compose up
+  wsl
   ```
 
-- Use ROS commands within the container
+- Actiate ROS environment
 
   ```bash
-  hassan@machine:~$ dox
-  ros@xxxxx:~$ ros2 --help
+  source /opt/ros/jazzy/setup.sh
   ```
 
+- From inside WSL (inside repo root), build workspace
+
+```bash
+colcon build --symlink-install
+```
+
+- Activate our workspace environment
+
+```bash
+source install/setup.sh
+```
 
 
 ## **🏗️** Build
 
-- Local ROS packages need to be build before they are used (even Python packages)
+- Local ROS packages need to be build before they are used (even Python packages). From repo root inside WSL, execute:
 
 ```bash
-cd ~/ros2_ws/
 colcon build --symlink-install
 ```
 
@@ -68,7 +76,11 @@ colcon build --symlink-install
       ```
 
 
-- Open Simulation world in Webots (from host, :file_folder: `ws/webots/<sim file>`)
+- Use RViz to visualze topics
+
+```bash
+rviz2
+```
 
 
 
@@ -141,8 +153,7 @@ ros2 run teleop_twist_keyboard teleop_twist_keyboard
 
     - [C++](https://github.com/ros2/examples/tree/jazzy/rclcpp/topics)
 
-- ROS Jazzy [tutorials/docs](https://docs.ros.org/en/jazzy) 
-- Foxglove [app](https://app.foxglove.dev)
+- ROS Jazzy [tutorials/docs](https://docs.ros.org/en/jazzy)
 - ROS client libraries 
 
     - [Python](https://docs.ros.org/en/jazzy/p/rclpy/) :star:

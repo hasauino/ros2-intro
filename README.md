@@ -120,6 +120,8 @@ ros2 run teleop_twist_keyboard teleop_twist_keyboard
 
 ## :link: Links
 
+- Compact doc for **rclpy**: [rclpy_concise_docs.md](rclpy_concise_docs.md)
+- CLI Cheat [sheet](cheat_sheet.md)
 - **Examples**
     - [Python](https://github.com/ros2/examples/tree/jazzy/rclpy/topics)
 
@@ -128,11 +130,7 @@ ros2 run teleop_twist_keyboard teleop_twist_keyboard
     - [C++](https://github.com/ros2/examples/tree/jazzy/rclcpp/topics)
 
 - ROS Jazzy [tutorials/docs](https://docs.ros.org/en/jazzy) 
-
-- Cheat [sheet](cheat_sheet.md)
-
 - Foxglove [app](https://app.foxglove.dev)
-
 - ROS client libraries 
 
     - [Python](https://docs.ros.org/en/jazzy/p/rclpy/) :star:
@@ -142,8 +140,6 @@ ros2 run teleop_twist_keyboard teleop_twist_keyboard
     - [Rust](https://github.com/adnanademovic/rosrust)
 
     - [NodeJs](https://github.com/RobotWebTools/rclnodejs)
-
 - ROS2 on GitHub: https://github.com/ros2/
-
 - tf2 API: [TF Buffer](https://github.com/ros2/geometry2/blob/rolling/tf2_ros_py/tf2_ros/buffer_interface.py)
 
